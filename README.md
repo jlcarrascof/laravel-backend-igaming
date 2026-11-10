@@ -1,39 +1,80 @@
-# Plataforma Base - Evaluación Técnica Backend / Full Stack (Laravel)
+# Plataforma de Gestión de Biblioteca - Evaluación Técnica Backend / Full Stack (Laravel)
 
-Este proyecto corresponde a la base arquitectónica desarrollada para una evaluación técnica en el sector **iGaming**, con foco en buenas prácticas, arquitectura por capas, transaccionalidad, manejo relacional de datos y diseño de APIs RESTful.
+Solución completa y funcional para la gestión integral de una biblioteca de libros con soporte de categorización, filtros dinámicos, API RESTful y frontend interactivo desarrollada en **PHP / Laravel** con arquitectura por capas, transaccionalidad y buenas prácticas orientadas a alta concurrencia.
+
+---
+
+## 🏛️ Decisiones Técnicas y Arquitectura
+
+1. **Patrón Arquitectónico Desacoplado (Service-Layer):**
+   - **Thin Controllers:** Los controladores (`BookController`, `CategoryController`) se limitan a orquestar la solicitud, delegando el 100% de la lógica a la capa de servicios y retornando recursos JSON estandarizados.
+   - **Services (`app/Services`):** `BookService` y `CategoryService` encapsulan las operaciones de lectura, escritura y las reglas de negocio.
+   - **Form Requests (`app/Http/Requests`):** Validación previa estricta con mensajes personalizados en español (`StoreBookRequest`, `UpdateBookRequest`, `StoreCategoryRequest`).
+   - **API Resources (`app/Http/Resources`):** Transformación predecible de datos (`BookResource`, `CategoryResource`) evitando la exposición directa de modelos Eloquent.
+
+2. **Lógica de Negocio y Reglas Críticas:**
+   - **Verificación previa a la eliminación de libros:** Se valida la existencia mediante `findOrFail()` dentro de transacciones atómicas antes de eliminar.
+   - **Protección de integridad en categorías:** Se verifica activamente que una categoría no tenga libros asociados (`books_count === 0`) antes de permitir su eliminación; en caso contrario, se arroja una excepción de validación descriptiva. Adicionalmente, la base de datos cuenta con la restricción foránea `restrictOnDelete()`.
+   - **Transaccionalidad Atómica:** Toda operación de mutación (crear, editar, eliminar) corre envuelta en bloques `DB::transaction(...)`.
+
+3. **Manejo Uniforme de Errores JSON:**
+   - Centralizado en `bootstrap/app.php` para que cualquier petición `/api/*` retorne siempre una respuesta estructurada con su código de estado HTTP correspondiente (404, 422, 500, etc.):
+     ```json
+     {
+       "message": "Error de validación en la solicitud.",
+       "errors": {
+         "title": ["El título debe tener al menos 3 caracteres."]
+       }
+     }
+     ```
+
+4. **Frontend Full Stack Dinámico:**
+   - Implementado en **Blade** con **Bootstrap 5** y **jQuery 3.7.1**.
+   - Consumo asíncrono vía AJAX con token CSRF inyectado globalmente.
+   - Paginación asíncrona de **8 en 8 registros** con recálculo dinámico.
+   - Filtrado en vivo por categoría y modales de creación/edición con manejo visible de errores en los inputs (`.is-invalid`).
+
+---
+
+## 📸 Vistas y Capturas del Sistema
+
+A continuación se presentan las capturas representativas de las funcionalidades implementadas en la solución:
+
+| # | Funcionalidad | Descripción | Captura |
+| :---: | :--- | :--- | :---: |
+| **1** | **Listado y Paginación** | Vista general de la biblioteca con paginación asíncrona de 8 en 8 registros y metadatos. | `docs/screenshots/01-listado-paginacion.png` |
+| **2** | **Filtrado por Categoría** | Filtro dinámico en tiempo real que consulta la API (`?category={id}`) y recalcula registros. | `docs/screenshots/02-filtro-categoria.png` |
+| **3** | **Creación con Validación** | Modal de registro con detección visual de errores (`.is-invalid`) y mensajes desde el FormRequest. | `docs/screenshots/03-crear-libro-validacion.png` |
+| **4** | **Edición de Libros** | Modal de edición con precarga de datos y actualización atómica vía `PUT /api/v1/books/{id}`. | `docs/screenshots/04-editar-libro.png` |
+| **5** | **Confirmación de Eliminación** | Diálogo interactivo de confirmación previo al borrado con verificación de existencia. | `docs/screenshots/05-eliminar-confirmacion.png` |
+| **6** | **Suite de Tests (20/20)** | Ejecución de los 20 tests automatizados y 193 aserciones en verde con SQLite en memoria. | `docs/screenshots/06-tests-phpunit.png` |
 
 ---
 
 ## 🛠️ Requisitos Previos
 
-- **Docker Desktop** (con soporte WSL2 en Windows o Docker Engine en Linux/macOS).
+- **Docker Desktop** (con integración WSL2 en Windows o Docker Engine en Linux/macOS).
 - **Git**.
 
-> **Nota:** No es necesario tener PHP ni Composer instalados en la máquina anfitriona (host). Todo el flujo corre de forma aislada mediante contenedores con **Laravel Sail**.
+> No se requiere PHP ni Composer en la máquina host. Todo el entorno corre aislado en contenedores mediante **Laravel Sail**.
 
 ---
 
 ## 🚀 Instalación y Puesta en Marcha (Desde Cero)
 
-### 1. Clonar el repositorio y acceder a la rama
+### 1. Clonar el repositorio
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/jlcarrascof/laravel-backend-igaming.git
 cd laravel-backend-igaming
-git checkout feat/setup-environment
 ```
 
-### 2. Variables de Entorno
-Copia el archivo de configuración base:
+### 2. Configurar variables de entorno
 ```bash
 cp .env.example .env
 ```
+*(Por defecto configurado para MySQL 8.4 en Sail. Cuenta con configuración alternativa comentada para PostgreSQL).*
 
-> **Configuración de Base de Datos:**
-> - Por defecto está configurado para **MySQL 8.4** mediante Sail.
-> - Si se requiere usar **PostgreSQL**, en `.env.example` y `.env` se encuentra la sección comentada con los parámetros para cambiar el motor de forma transparente.
-
-### 3. Instalar Dependencias de Composer (si no existen)
-Si clonas en un entorno nuevo sin `vendor/`, ejecuta:
+### 3. Instalar dependencias con Docker (si se clona en host limpio)
 ```bash
 docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/app" -w /app composer:2 composer install --ignore-platform-reqs
 ```
@@ -43,73 +84,69 @@ docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/app" -w /app composer:2 compo
 ./vendor/bin/sail up -d
 ```
 
-### 5. Generar Clave de Aplicación y Migrar Base de Datos
+### 5. Generar Application Key y Ejecutar Migraciones con Seeders
 ```bash
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate --seed
 ```
 
-La aplicación estará disponible de inmediato en:
-- **Web (Frontend Demo):** [http://localhost](http://localhost)
+La aplicación estará lista en:
+- **Frontend Interactivo (Gestión de Libros):** [http://localhost](http://localhost)
 - **API Health Check:** [http://localhost/api/v1/health](http://localhost/api/v1/health)
 
 ---
 
-## 🧪 Pruebas Automatizadas (Testing)
+## 🧪 Pruebas Automatizadas (Testing Suite)
 
-Los tests de integración y feature están configurados para correr sobre una base de datos **SQLite en memoria (`:memory:`)**, lo que garantiza ejecución ultrarrápida sin alterar los datos del entorno de desarrollo:
+La suite de pruebas ejecuta **20 tests de integración y 193 aserciones** en SQLite en memoria (`:memory:`) en ~1.1 segundos:
 
 ```bash
 ./vendor/bin/sail test
 ```
 
-Para ver la cobertura o detalle de aserciones:
-```bash
-./vendor/bin/sail artisan test --colors=always
-```
+### Casos de prueba cubiertos:
+- **Libros (`BookApiTest`):**
+  - Listado paginado de libros (8 por página).
+  - Filtrado de libros por categoría (`?category={id}`).
+  - Detalle individual de libro por ID.
+  - Creación con datos válidos (`201 Created`).
+  - Validación de campos requeridos y tipos inválidos (`422 Unprocessable Content`).
+  - Actualización parcial y total de libros (`200 OK`).
+  - Eliminación con persistencia verificada (`200 OK`).
+  - Retorno 404 uniforme al intentar borrar un libro inexistente.
+- **Categorías (`CategoryApiTest`):**
+  - Listado de categorías con conteo de libros.
+  - Creación con nombre único.
+  - Bloqueo de nombres duplicados (`422`).
+  - Eliminación permitida de categoría vacía (`200 OK`).
+  - **Bloqueo estricto de eliminación de categoría con libros asociados (`422`)**.
+- **Infraestructura:**
+  - Diagnóstico de conectividad de base de datos en `/health`.
+  - Respuestas 404 globales en formato JSON estándar.
 
 ---
 
-## 🎨 Calidad de Código y Estilo
+## 🧹 Estándar de Código (Linting)
 
-El proyecto utiliza **Laravel Pint** para asegurar el cumplimiento del estándar PSR-12 y las convenciones de Laravel:
+Código formateado y validado bajo el estándar oficial de Laravel (PSR-12) con **Laravel Pint**:
 
 ```bash
-# Revisar y corregir formato automáticamente
 ./vendor/bin/sail pint
-
-# Verificar formato sin modificar archivos
-./vendor/bin/sail pint --test
 ```
 
 ---
 
-## 📡 Endpoints de la API (`/api/v1`)
-
-Todos los endpoints retornan respuestas estructuradas en formato JSON uniforme.
+## 📡 Catálogo de Endpoints RESTful (`/api/v1`)
 
 | Método | Endpoint | Descripción | Códigos HTTP |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/api/v1/health` | Estado del servicio y conectividad con la BD | `200` |
-| **GET** | `/api/v1/notes` | Listado paginado de notas registradas | `200` |
-| **POST** | `/api/v1/notes` | Creación de una nueva nota (valida campos) | `201`, `422` |
-
-### Formato Uniforme de Respuestas de Error
-Toda excepción bajo el prefijo `/api/*` retorna un payload JSON estandarizado:
-```json
-{
-  "message": "Error de validación en la solicitud.",
-  "errors": {
-    "title": [
-      "El título es obligatorio."
-    ]
-  }
-}
-```
-
----
-
-## 📐 Decisiones Técnicas y Convenciones
-
-Para consultar en detalle las decisiones de diseño arquitectónico, el estándar de controladores delgados, la gestión de transacciones monetarias y la prevención de condiciones de carrera (*race conditions*), consulta el documento:
-👉 **[ARCHITECTURE.md](ARCHITECTURE.md)**
+| **GET** | `/api/v1/health` | Estado del sistema y conectividad a la BD | `200` |
+| **GET** | `/api/v1/books` | Listar libros paginados (por defecto 8 por página) | `200` |
+| **GET** | `/api/v1/books?category={id}` | Filtrar libros por categoría | `200` |
+| **GET** | `/api/v1/books/{id}` | Obtener detalle de un libro | `200`, `404` |
+| **POST** | `/api/v1/books` | Registrar un nuevo libro | `201`, `422` |
+| **PUT** | `/api/v1/books/{id}` | Editar información de un libro | `200`, `422`, `404` |
+| **DELETE**| `/api/v1/books/{id}` | Eliminar libro (valida existencia previa) | `200`, `404` |
+| **GET** | `/api/v1/categories` | Listar categorías con conteo de libros | `200` |
+| **POST** | `/api/v1/categories` | Crear nueva categoría (nombre único) | `201`, `422` |
+| **DELETE**| `/api/v1/categories/{id}` | Eliminar categoría (bloquea si tiene libros) | `200`, `422`, `404` |
