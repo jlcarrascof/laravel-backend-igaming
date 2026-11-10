@@ -175,3 +175,6 @@ Código formateado y validado bajo el estándar oficial de Laravel (PSR-12) con 
 | **GET** | `/api/v1/categories` | Listar categorías con conteo de libros | `200` |
 | **POST** | `/api/v1/categories` | Crear nueva categoría (nombre único) | `201`, `422` |
 | **DELETE**| `/api/v1/categories/{id}` | Eliminar categoría (bloquea si tiene libros) | `200`, `422`, `404` |
+
+## Javier J. Martínez F.
+Full Stack Developer - AI Technical Implementation Manager | SaaS Delivery & Onboarding
