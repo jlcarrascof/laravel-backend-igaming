@@ -256,7 +256,7 @@ $(document).ready(function () {
         $empty.addClass('d-none');
         $('#books-pagination-container').addClass('d-none');
 
-        let url = `/api/v1/books?per_page=10&page=${page}`;
+        let url = `/api/v1/books?per_page=8&page=${page}`;
         if (categoryId) {
             url += `&category=${encodeURIComponent(categoryId)}`;
         }

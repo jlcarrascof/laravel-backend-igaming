@@ -12,7 +12,7 @@ class BookService
     /**
      * Listar libros con opción de filtrado por categoría y paginación.
      */
-    public function getBooks(?int $categoryId = null, int $perPage = 10): LengthAwarePaginator
+    public function getBooks(?int $categoryId = null, int $perPage = 8): LengthAwarePaginator
     {
         return Book::query()
             ->with('category')

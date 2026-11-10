@@ -23,7 +23,7 @@ class BookController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $categoryId = $request->query('category') ? (int) $request->query('category') : null;
-        $perPage = (int) $request->query('per_page', 10);
+        $perPage = (int) $request->query('per_page', 8);
 
         $books = $this->bookService->getBooks($categoryId, $perPage);
 
