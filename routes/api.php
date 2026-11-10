@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\NoteController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +20,5 @@ Route::get('/health', function () {
         ],
     ], 200);
 });
+
+Route::apiResource('notes', NoteController::class)->only(['index', 'store']);
