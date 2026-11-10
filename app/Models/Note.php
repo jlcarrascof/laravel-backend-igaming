@@ -14,4 +14,3 @@ class Note extends Model
         'content',
     ];
 }
-

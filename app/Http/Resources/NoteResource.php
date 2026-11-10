@@ -18,4 +18,3 @@ class NoteResource extends JsonResource
         ];
     }
 }
-

@@ -8,7 +8,7 @@ Route::get('/health', function () {
     try {
         DB::connection()->getPdo();
         $dbStatus = 'connected';
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         $dbStatus = 'disconnected';
     }
 

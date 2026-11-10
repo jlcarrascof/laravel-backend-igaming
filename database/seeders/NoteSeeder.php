@@ -12,4 +12,3 @@ class NoteSeeder extends Seeder
         Note::factory()->count(5)->create();
     }
 }
-

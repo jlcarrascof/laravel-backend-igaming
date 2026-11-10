@@ -37,4 +37,3 @@ class NoteController extends Controller
             ->setStatusCode(201);
     }
 }
-

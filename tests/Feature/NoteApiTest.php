@@ -83,4 +83,3 @@ class NoteApiTest extends TestCase
             ]);
     }
 }
-
