@@ -83,3 +83,4 @@ class CategoryApiTest extends TestCase
         $this->assertDatabaseHas('categories', ['id' => $category->id]);
     }
 }
+

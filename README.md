@@ -36,6 +36,21 @@ Solución completa y funcional para la gestión integral de una biblioteca de li
 
 ---
 
+## 📸 Vistas y Capturas del Sistema
+
+A continuación se presentan las capturas representativas de las funcionalidades implementadas en la solución:
+
+| # | Funcionalidad | Descripción | Captura |
+| :---: | :--- | :--- | :---: |
+| **1** | **Listado y Paginación** | Vista general de la biblioteca con paginación asíncrona de 8 en 8 registros y metadatos. | `docs/screenshots/01-listado-paginacion.png` |
+| **2** | **Filtrado por Categoría** | Filtro dinámico en tiempo real que consulta la API (`?category={id}`) y recalcula registros. | `docs/screenshots/02-filtro-categoria.png` |
+| **3** | **Creación con Validación** | Modal de registro con detección visual de errores (`.is-invalid`) y mensajes desde el FormRequest. | `docs/screenshots/03-crear-libro-validacion.png` |
+| **4** | **Edición de Libros** | Modal de edición con precarga de datos y actualización atómica vía `PUT /api/v1/books/{id}`. | `docs/screenshots/04-editar-libro.png` |
+| **5** | **Confirmación de Eliminación** | Diálogo interactivo de confirmación previo al borrado con verificación de existencia. | `docs/screenshots/05-eliminar-confirmacion.png` |
+| **6** | **Suite de Tests (20/20)** | Ejecución de los 20 tests automatizados y 193 aserciones en verde con SQLite en memoria. | `docs/screenshots/06-tests-phpunit.png` |
+
+---
+
 ## 🛠️ Requisitos Previos
 
 - **Docker Desktop** (con integración WSL2 en Windows o Docker Engine en Linux/macOS).
