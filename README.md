@@ -1,59 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plataforma Base - Evaluación Técnica Backend / Full Stack (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto corresponde a la base arquitectónica desarrollada para una evaluación técnica en el sector **iGaming**, con foco en buenas prácticas, arquitectura por capas, transaccionalidad, manejo relacional de datos y diseño de APIs RESTful.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🛠️ Requisitos Previos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Docker Desktop** (con soporte WSL2 en Windows o Docker Engine en Linux/macOS).
+- **Git**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> **Nota:** No es necesario tener PHP ni Composer instalados en la máquina anfitriona (host). Todo el flujo corre de forma aislada mediante contenedores con **Laravel Sail**.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Instalación y Puesta en Marcha (Desde Cero)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Clonar el repositorio y acceder a la rama
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd laravel-backend-igaming
+git checkout feat/setup-environment
+```
 
-## Laravel Sponsors
+### 2. Variables de Entorno
+Copia el archivo de configuración base:
+```bash
+cp .env.example .env
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+> **Configuración de Base de Datos:**
+> - Por defecto está configurado para **MySQL 8.4** mediante Sail.
+> - Si se requiere usar **PostgreSQL**, en `.env.example` y `.env` se encuentra la sección comentada con los parámetros para cambiar el motor de forma transparente.
 
-### Premium Partners
+### 3. Instalar Dependencias de Composer (si no existen)
+Si clonas en un entorno nuevo sin `vendor/`, ejecuta:
+```bash
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/app" -w /app composer:2 composer install --ignore-platform-reqs
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 4. Iniciar Contenedores con Laravel Sail
+```bash
+./vendor/bin/sail up -d
+```
 
-## Contributing
+### 5. Generar Clave de Aplicación y Migrar Base de Datos
+```bash
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+La aplicación estará disponible de inmediato en:
+- **Web (Frontend Demo):** [http://localhost](http://localhost)
+- **API Health Check:** [http://localhost/api/v1/health](http://localhost/api/v1/health)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🧪 Pruebas Automatizadas (Testing)
 
-## Security Vulnerabilities
+Los tests de integración y feature están configurados para correr sobre una base de datos **SQLite en memoria (`:memory:`)**, lo que garantiza ejecución ultrarrápida sin alterar los datos del entorno de desarrollo:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+./vendor/bin/sail test
+```
 
-## License
+Para ver la cobertura o detalle de aserciones:
+```bash
+./vendor/bin/sail artisan test --colors=always
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🎨 Calidad de Código y Estilo
+
+El proyecto utiliza **Laravel Pint** para asegurar el cumplimiento del estándar PSR-12 y las convenciones de Laravel:
+
+```bash
+# Revisar y corregir formato automáticamente
+./vendor/bin/sail pint
+
+# Verificar formato sin modificar archivos
+./vendor/bin/sail pint --test
+```
+
+---
+
+## 📡 Endpoints de la API (`/api/v1`)
+
+Todos los endpoints retornan respuestas estructuradas en formato JSON uniforme.
+
+| Método | Endpoint | Descripción | Códigos HTTP |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/v1/health` | Estado del servicio y conectividad con la BD | `200` |
+| **GET** | `/api/v1/notes` | Listado paginado de notas registradas | `200` |
+| **POST** | `/api/v1/notes` | Creación de una nueva nota (valida campos) | `201`, `422` |
+
+### Formato Uniforme de Respuestas de Error
+Toda excepción bajo el prefijo `/api/*` retorna un payload JSON estandarizado:
+```json
+{
+  "message": "Error de validación en la solicitud.",
+  "errors": {
+    "title": [
+      "El título es obligatorio."
+    ]
+  }
+}
+```
+
+---
+
+## 📐 Decisiones Técnicas
+
+*(Sección reservada para documentar las decisiones de diseño, algoritmos y reglas de negocio específicas una vez presentado el enunciado final de la evaluación).*
