@@ -203,15 +203,26 @@ $(document).ready(function () {
     let categoriesCache = [];
     let currentPage = 1;
 
-    // Mostrar alerta descartable
-    function showAlert(container, type, message) {
+    // Mostrar alerta descartable con auto-cierre opcional
+    function showAlert(container, type, message, autoDismissSeconds = 5) {
+        const alertId = 'alert-' + Date.now();
         const alertHtml = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `;
         container.html(alertHtml);
+
+        if (autoDismissSeconds > 0) {
+            setTimeout(function () {
+                const alertEl = document.getElementById(alertId);
+                if (alertEl) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+                    bsAlert.close();
+                }
+            }, autoDismissSeconds * 1000);
+        }
     }
 
     // Renderizar Paginación
