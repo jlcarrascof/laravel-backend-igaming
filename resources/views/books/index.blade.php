@@ -73,6 +73,16 @@
                 <tbody id="books-table-body"></tbody>
             </table>
         </div>
+
+        <!-- Paginación Asíncrona (10 en 10) -->
+        <div class="card-footer bg-white border-top-0 py-3 d-none" id="books-pagination-container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted" id="pagination-info">Mostrando registros</div>
+                <nav aria-label="Navegación de libros">
+                    <ul class="pagination pagination-sm mb-0" id="pagination-links"></ul>
+                </nav>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -156,6 +166,7 @@ $(document).ready(function () {
     const $saveText = $('#save-text');
 
     let categoriesCache = [];
+    let currentPage = 1;
 
     // Mostrar alerta descartable
     function showAlert(container, type, message) {
@@ -166,6 +177,54 @@ $(document).ready(function () {
             </div>
         `;
         container.html(alertHtml);
+    }
+
+    // Renderizar Paginación
+    function renderPagination(meta) {
+        const $pagContainer = $('#books-pagination-container');
+        const $pagInfo = $('#pagination-info');
+        const $pagLinks = $('#pagination-links');
+
+        if (!meta || meta.total === 0) {
+            $pagContainer.addClass('d-none');
+            return;
+        }
+
+        $pagInfo.text(`Mostrando ${meta.from || 0} a ${meta.to || 0} de ${meta.total} libro(s) (Pág. ${meta.current_page} de ${meta.last_page})`);
+        $pagLinks.empty();
+
+        if (meta.last_page <= 1) {
+            $pagContainer.removeClass('d-none');
+            return;
+        }
+
+        // Botón Anterior
+        const prevDisabled = meta.current_page === 1 ? 'disabled' : '';
+        $pagLinks.append(`
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link page-nav-link" href="#" data-page="${meta.current_page - 1}">&laquo;</a>
+            </li>
+        `);
+
+        // Botones de Páginas Numéricas
+        for (let i = 1; i <= meta.last_page; i++) {
+            const active = i === meta.current_page ? 'active' : '';
+            $pagLinks.append(`
+                <li class="page-item ${active}">
+                    <a class="page-link page-nav-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+
+        // Botón Siguiente
+        const nextDisabled = meta.current_page === meta.last_page ? 'disabled' : '';
+        $pagLinks.append(`
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link page-nav-link" href="#" data-page="${meta.current_page + 1}">&raquo;</a>
+            </li>
+        `);
+
+        $pagContainer.removeClass('d-none');
     }
 
     // Cargar Categorías en Selects
@@ -189,15 +248,17 @@ $(document).ready(function () {
         });
     }
 
-    // Cargar Libros con soporte de filtro
-    function loadBooks(categoryId = null) {
+    // Cargar Libros con soporte de filtro y paginación
+    function loadBooks(categoryId = null, page = 1) {
+        currentPage = page;
         $loading.removeClass('d-none');
         $tableContainer.addClass('d-none');
         $empty.addClass('d-none');
+        $('#books-pagination-container').addClass('d-none');
 
-        let url = '/api/v1/books';
+        let url = `/api/v1/books?per_page=10&page=${page}`;
         if (categoryId) {
-            url += `?category=${encodeURIComponent(categoryId)}`;
+            url += `&category=${encodeURIComponent(categoryId)}`;
         }
 
         $.ajax({
@@ -208,7 +269,8 @@ $(document).ready(function () {
                 $tableBody.empty();
 
                 const books = res.data || [];
-                $countBadge.text(`Mostrando ${books.length} libro(s)`);
+                const total = (res.meta && res.meta.total) ? res.meta.total : books.length;
+                $countBadge.text(`Total: ${total} libro(s)`);
 
                 if (books.length === 0) {
                     $empty.removeClass('d-none');
@@ -245,6 +307,7 @@ $(document).ready(function () {
                 });
 
                 $tableContainer.removeClass('d-none');
+                renderPagination(res.meta);
             },
             error: function () {
                 $loading.addClass('d-none');
@@ -252,6 +315,15 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Navegar por la paginación
+    $(document).on('click', '.page-nav-link', function (e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'), 10);
+        if (page && page !== currentPage) {
+            loadBooks($filterCategory.val(), page);
+        }
+    });
 
     // Limpiar Errores del Modal
     function clearModalErrors() {
@@ -406,3 +478,4 @@ $(document).ready(function () {
 });
 </script>
 @endpush
+
