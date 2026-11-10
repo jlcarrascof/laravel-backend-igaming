@@ -145,12 +145,47 @@
         </div>
     </div>
 </div>
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="bi bi-trash3 text-danger fs-1 d-block mb-3"></i>
+                <p class="mb-1 text-secondary">¿Estás seguro de que deseas eliminar el siguiente libro?</p>
+                <h5 class="fw-bold text-dark mt-2" id="delete-book-title"></h5>
+                <small class="text-muted d-block mt-1">ID: #<span id="delete-book-id"></span></small>
+                <div class="alert alert-warning py-2 px-3 mt-3 mb-0 small text-start">
+                    <i class="bi bi-info-circle me-1"></i> Esta acción no se puede deshacer y el registro será borrado de la base de datos.
+                </div>
+            </div>
+            <div class="modal-footer bg-light justify-content-center border-top-0 pt-0 pb-3">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger px-4" id="btn-confirm-delete">
+                    <span class="spinner-border spinner-border-sm d-none me-1" id="delete-spinner"></span>
+                    <i class="bi bi-trash3 me-1" id="delete-icon"></i>
+                    <span id="delete-btn-text">Sí, Eliminar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
 $(document).ready(function () {
     const bookModal = new bootstrap.Modal(document.getElementById('bookModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    let bookToDeleteId = null;
+    let bookToDeleteTitle = '';
     const $filterCategory = $('#filter-category');
     const $bookCategory = $('#book-category');
     const $tableContainer = $('#books-table-container');
@@ -438,25 +473,46 @@ $(document).ready(function () {
         });
     });
 
-    // Eliminar Libro con Confirmación
+    // Abrir Modal de Confirmación de Eliminación
     $(document).on('click', '.btn-delete', function () {
-        const bookId = $(this).data('id');
-        const title = $(this).data('title');
+        bookToDeleteId = $(this).data('id');
+        bookToDeleteTitle = $(this).data('title');
 
-        if (!confirm(`¿Estás seguro de que deseas eliminar el libro "${title}" (ID: ${bookId})?`)) {
-            return;
-        }
+        $('#delete-book-id').text(bookToDeleteId);
+        $('#delete-book-title').text(bookToDeleteTitle);
+
+        $('#btn-confirm-delete').prop('disabled', false);
+        $('#delete-spinner').addClass('d-none');
+        $('#delete-icon').removeClass('d-none');
+        $('#delete-btn-text').text('Sí, Eliminar');
+
+        deleteModal.show();
+    });
+
+    // Ejecutar Eliminación tras Confirmación en Modal
+    $('#btn-confirm-delete').on('click', function () {
+        if (!bookToDeleteId) return;
+
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+        $('#delete-spinner').removeClass('d-none');
+        $('#delete-icon').addClass('d-none');
+        $('#delete-btn-text').text('Eliminando...');
 
         $.ajax({
-            url: `/api/v1/books/${bookId}`,
+            url: `/api/v1/books/${bookToDeleteId}`,
             type: 'DELETE',
             success: function () {
-                showAlert($globalAlert, 'success', `Libro "${title}" eliminado exitosamente.`);
-                loadBooks($filterCategory.val());
+                deleteModal.hide();
+                showAlert($globalAlert, 'success', `Libro "${bookToDeleteTitle}" eliminado exitosamente.`);
+                loadBooks($filterCategory.val(), currentPage);
+                bookToDeleteId = null;
             },
             error: function (xhr) {
+                deleteModal.hide();
                 const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'No se pudo eliminar el libro.';
                 showAlert($globalAlert, 'danger', msg);
+                bookToDeleteId = null;
             }
         });
     });
