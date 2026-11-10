@@ -40,14 +40,39 @@ Solución completa y funcional para la gestión integral de una biblioteca de li
 
 A continuación se presentan las capturas representativas de las funcionalidades implementadas en la solución:
 
-| # | Funcionalidad | Descripción | Captura |
-| :---: | :--- | :--- | :---: |
-| **1** | **Listado y Paginación** | Vista general de la biblioteca con paginación asíncrona de 8 en 8 registros y metadatos. | `docs/screenshots/01-listado-paginacion.png` |
-| **2** | **Filtrado por Categoría** | Filtro dinámico en tiempo real que consulta la API (`?category={id}`) y recalcula registros. | `docs/screenshots/02-filtro-categoria.png` |
-| **3** | **Creación con Validación** | Modal de registro con detección visual de errores (`.is-invalid`) y mensajes desde el FormRequest. | `docs/screenshots/03-crear-libro-validacion.png` |
-| **4** | **Edición de Libros** | Modal de edición con precarga de datos y actualización atómica vía `PUT /api/v1/books/{id}`. | `docs/screenshots/04-editar-libro.png` |
-| **5** | **Confirmación de Eliminación** | Diálogo interactivo de confirmación previo al borrado con verificación de existencia. | `docs/screenshots/05-eliminar-confirmacion.png` |
-| **6** | **Suite de Tests (20/20)** | Ejecución de los 20 tests automatizados y 193 aserciones en verde con SQLite en memoria. | `docs/screenshots/06-tests-phpunit.png` |
+### 1. Listado Principal con Paginación Asíncrona (8 registros por página)
+Vista general de la biblioteca con metadatos de registros, badges de categorías y controles de navegación:
+![01 - Listado y Paginación](docs/screenshots/01-listado-paginacion.png)
+
+---
+
+### 2. Filtrado Dinámico por Categoría en Tiempo Real
+Filtro interactivo vía selector AJAX (`GET /api/v1/books?category={id}`) con recálculo dinámico de resultados:
+![02 - Filtrado por Categoría](docs/screenshots/02-filtro-categoria.png)
+
+---
+
+### 3. Registro de Nuevo Libro con Validación en Formulario Modal
+Modal interactivo con detección de campos requeridos, feedback visual (`.is-invalid`) y mensajes de error desde el servidor (422):
+![03 - Creación con Validación](docs/screenshots/03-crear-libro-validacion.png)
+
+---
+
+### 4. Edición de Información de Libro Existente
+Modal de actualización con precarga de información y guardado atómico mediante `PUT /api/v1/books/{id}`:
+![04 - Edición de Libro](docs/screenshots/04-editar-libro.png)
+
+---
+
+### 5. Confirmación de Eliminación con Modal Responsive
+Diálogo estilizado de confirmación con alerta preventiva y eliminación segura mediante `DELETE /api/v1/books/{id}`:
+![05 - Confirmación de Eliminación](docs/screenshots/05-eliminar-confirmacion.png)
+
+---
+
+### 6. Ejecución de Pruebas Automatizadas (20/20 Tests en Verde)
+Ejecución de la suite completa con 193 aserciones en base de datos SQLite en memoria:
+![06 - Suite de Tests PHPUnit](docs/screenshots/06-tests-phpunit.png)
 
 ---
 
