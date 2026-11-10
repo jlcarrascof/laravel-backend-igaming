@@ -109,6 +109,7 @@ Toda excepción bajo el prefijo `/api/*` retorna un payload JSON estandarizado:
 
 ---
 
-## 📐 Decisiones Técnicas
+## 📐 Decisiones Técnicas y Convenciones
 
-*(Sección reservada para documentar las decisiones de diseño, algoritmos y reglas de negocio específicas una vez presentado el enunciado final de la evaluación).*
+Para consultar en detalle las decisiones de diseño arquitectónico, el estándar de controladores delgados, la gestión de transacciones monetarias y la prevención de condiciones de carrera (*race conditions*), consulta el documento:
+👉 **[ARCHITECTURE.md](ARCHITECTURE.md)**
